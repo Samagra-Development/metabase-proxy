@@ -1,0 +1,35 @@
+version: '2'
+services:
+    pg-docker-metabase:
+        container_name: pg-docker
+        image: 'postgres:12.1-alpine'
+        restart: unless-stopped
+        environment:
+            PGDATA: /var/lib/postgresql/data
+            POSTGRES_PASSWORD: docker
+            POSTGRES_USER: postgres
+            POSTGRES_DB: metabase
+        volumes:
+            - 'postgres:/var/lib/postgresql/data'
+    metabase:
+        image: 'bla/metabase'
+        container_name: metabase-production
+        mem_limit: 3000m
+        restart: unless-stopped
+        environment:
+            JAVA_TOOL_OPTIONS: '-Xmx6g'
+            MB_DB_TYPE: postgres
+            MB_DB_DBNAME: metabase
+            MB_DB_PORT: 5432
+            MB_DB_USER: postgres
+            MB_DB_PASS: docker
+            MB_DB_HOST: pg-docker
+            MB_DB_CONNECTION_URI: 'postgres://pg-docker:5432/metabase?user=postgres&password=docker'
+        ports:
+            - '3000:3000'
+        depends_on:
+            - pg-docker-metabase
+        links:
+            - pg-docker-metabase
+volumes:
+    postgres:
